@@ -1,14 +1,18 @@
 from customtkinter import *
+from blackjack import Blackjack
 
-frame = None
+
 root = CTk()
+frame = None
 
 def cambiar_juego(juego):
+    global frame
+    clear_screen()
     match juego:
         case "Ruleta":
             pass
         case "Blackjack":
-            pass
+            Blackjack(frame, start_screen)
         case "Carrera de caballos":
             pass
         case "Coinflip":
@@ -22,26 +26,34 @@ def cambiar_juego(juego):
         case "Mines":
             pass
 
+def clear_screen():
+    global frame
+    if frame:
+        for widget in frame.winfo_children():
+            widget.destroy()
 
 def start_screen():
+    global frame
+    clear_screen()
     frame = CTkFrame(root)
-    frame.pack(fill="both", expand=True)
+    frame.place(relwidth=1, relheight=1)
 
-    ruleta = CTkButton(frame, text="Ruleta", command= cambiar_juego("Ruleta"))
-    ruleta.pack(side="top")
+    ruleta = CTkButton(frame, text="Ruleta", command = lambda: cambiar_juego("Ruleta"))
+    ruleta.place(relx=0.5, rely=0.3, anchor="center")
+
+    blackjack = CTkButton(frame, text="Blackjack", command = lambda: cambiar_juego("Blackjack"))
+    blackjack.place(relx=0.5, rely=0.4, anchor="center")
+    
     
 
 
 def main():
-    
+    global frame, root
     root.title("Custom Tkinter")
     root.geometry("1280x720")
     root.resizable(False, False)
 
-    start_screen(root)
-
-    back = CTkButton(frame, text="Back", command=lambda: start_screen(root))
-    back.pack(side="bottom")
+    start_screen()
 
     root.mainloop()
 
