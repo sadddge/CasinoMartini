@@ -1,5 +1,5 @@
 from customtkinter import *
-
+from dados import Dados
 
 root = CTk()
 frame = None
