@@ -7,6 +7,7 @@ class Dados(CTkFrame):
         super().__init__(root)
         self.place(relwidth=1, relheight=1)
 
+        self.setear_imagenes()
         self.comando = comando
         self.label = CTkLabel(self, text="Dados")
         self.label.place(relx=0.5, rely=0.1, anchor="center")
@@ -18,7 +19,7 @@ class Dados(CTkFrame):
         self.label_mj = CTkLabel(self, text="Apuesta:")
         self.label_mj.place(relx=0.5, rely=0.4, anchor="center")
 
-        self.apuesta_entry = CTkEntry(self)
+        self.apuesta_entry = CTkEntry(self, placeholder_text="$")
         self.apuesta_entry.place(relx=0.5, rely=0.4625, anchor="center")
 
         self.enviar = CTkButton(self, text="----->", command=self.modos_de_juego)
@@ -117,8 +118,6 @@ class Dados(CTkFrame):
     def mj_numero_dados(self):
         resultado = "Resultado:"
         self.enviar.configure(text="Reiniciar",command=self.restart)
-        
-        
 
         self.lista_labels_result = []
         start_x = (1280-100*int(self.dados)-100*(int(self.dados)-1))/2
@@ -130,33 +129,38 @@ class Dados(CTkFrame):
             lista_dados_random.append(dado_random)
 
         
+
         for entry in self.lista_entrys:
             entry.destroy()
         
         for i in range(int(self.dados)):
-            self.lista_labels_result.append(CTkLabel(self, text=f"Dado ganador D{i+1}: {lista_dados_random[i]}\nTu apuesta: {self.lista_apuestas_dados[i]}"))
-            self.lista_labels_result[i].place(x=start_x+200*i, rely=0.4325)
+            label = CTkLabel(self, text=f"Dado ganador D{i+1}: {lista_dados_random[i]}\nTu apuesta: {self.lista_apuestas_dados[i]}", width=100, height=100)
+            self.lista_labels_result.append(label)
+            if int(self.lista_apuestas_dados[i]) == lista_dados_random[i]:
+                label.configure(image=self.green_check_img, compound="top")
+            else:
+                label.configure(image=self.red_x_img, compound="top")
+            label.place(x=start_x+200*i, rely=0.35)
         
         if self.lista_apuestas_dados == lista_dados_random:
             resultado += "\n¡Ganaste!"
         
         self.label_mj.configure(text=f"{resultado}")
+        self.label_mj.place(relx=0.5, rely=0.3, anchor="center")
         
             
 
     def mj_suma_dados(self):
         self.enviar.configure(text="Reiniciar",command=self.restart)
-        green_check = Image.open("resources/green_check.png")
-        red_x = Image.open("resources/red_x.png")
 
         suma_dados_random = random.randint(1*int(self.dados), 6*int(self.dados))
         resultado = f"Resultado: {suma_dados_random}\nTu apuesta: {self.apuesta_dados}\n"
         if int(self.apuesta_dados) == suma_dados_random:
-            resultado_img = green_check
+            self.label_img = CTkLabel(self, text="", image=self.green_check_img, width=40, height=40)
         else:
-            resultado_img = red_x
+            self.label_img = CTkLabel(self, text="", image=self.red_x_img, width=40, height=40)
         self.label_mj.configure(text=f"{resultado}")
-        self.label_img = CTkLabel(self, image=CTkImage(light_image=resultado_img, dark_image=resultado_img, size=(30,30)), width=40, height=40)
+        self.label_img.place(relx=0.5, rely=0.30, anchor="center")
         
 
     def clear_screen(self):
@@ -166,6 +170,10 @@ class Dados(CTkFrame):
     def restart(self):
         self.clear_screen()
         self.start_apuesta(self.comando)
+
+    def setear_imagenes(self):
+        self.green_check_img = CTkImage(light_image=Image.open("resources/green_check.png"), size=(30,30))
+        self.red_x_img = CTkImage(light_image=Image.open("resources/red_x.png"), size=(30,30))
            
     
         
