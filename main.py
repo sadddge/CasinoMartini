@@ -1,4 +1,5 @@
 from customtkinter import *
+from crash import Crash
 
 
 root = CTk()
