@@ -1,5 +1,5 @@
 from customtkinter import *
-
+from mines import Mines
 
 root = CTk()
 frame = None
