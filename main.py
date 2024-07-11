@@ -4,6 +4,7 @@ from crash import Crash
 
 from coinflip import Coinflip
 
+from dados import Dados
 
 root = CTk()
 frame = None
