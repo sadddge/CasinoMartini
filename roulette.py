@@ -96,7 +96,7 @@ class RouletteGame(CTkFrame):
         self.bet_menu = CTkFrame(self, width=frame_width, height=frame_height, fg_color="transparent")
         self.bet_menu.place(relx=0.5, rely=0.75, anchor="center")
         
-        number_button = CTkButton(self.bet_menu, text="0", width=size, height= size * 3 + 2 * pad, fg_color="#00bf63", hover_color=hover, font=font)
+        number_button = CTkButton(self.bet_menu, text="0", width=size, height= size * 3 + 2 * pad, fg_color="#00bf63", hover_color=hover, font=font, command=lambda: self.bet_on_number([0]))
         number_button.place(x=5, y=5)
         
         
