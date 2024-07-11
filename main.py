@@ -1,5 +1,6 @@
 from customtkinter import *
 from blackjack import Blackjack
+from crash import Crash
 
 
 root = CTk()
