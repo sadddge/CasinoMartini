@@ -16,31 +16,35 @@ class Coinflip(CTkFrame):
 
     def interface_apuesta_cash(self):
         self.label_apuesta = CTkLabel(self, text="Apuesta:")
-        self.label_apuesta.place(relx=0.5, rely=0.3, anchor="center")
+        self.label_apuesta.place(relx=0.15, rely=0.35, anchor="center")
 
         self.entry_apuesta = CTkEntry(self, placeholder_text="$")
-        self.entry_apuesta.place(relx=0.5, rely=0.4, anchor="center")
+        self.entry_apuesta.place(relx=0.15, rely=0.4, anchor="center")
 
-        self.boton_enviar = CTkButton(self, text="----->", command=self.set_apuesta_cash)
-        self.boton_enviar.place(relx=0.5, rely=0.5, anchor="center")
+        self.boton_cara = CTkButton(self, text="Cara", command=lambda:self.set_apuesta_coin("Cara"), width=65)
+        self.boton_cara.place(relx=0.12, rely=0.45, anchor="center")
 
-    def set_apuesta_cash(self):
-        self.apuesta_cash = self.entry_apuesta.get()
-        self.interface_apuesta_coin()
+        self.boton_sello = CTkButton(self, text="Sello", command=lambda:self.set_apuesta_coin("Sello"), width=65)
+        self.boton_sello.place(relx=0.18, rely=0.45, anchor="center")
 
-    def interface_apuesta_coin(self):
-        self.label_apuesta.destroy()
-        self.entry_apuesta.destroy()
-        self.boton_enviar.destroy()
-
-        self.boton_cara = CTkButton(self, text="Cara", command=lambda:self.set_apuesta_coin("Cara"), width=120, height=120, font=("Arial", 18))
-        self.boton_cara.place(relx=0.45, rely=0.5, anchor="center")
-
-        self.boton_sello = CTkButton(self, text="Sello", command=lambda:self.set_apuesta_coin("Sello"), width=120, height=120, font=("Arial", 18))
-        self.boton_sello.place(relx=0.55, rely=0.5, anchor="center") 
+        self.boton_enviar = CTkButton(self, text="----->", command=lambda:self.set_apuesta(self.entry_apuesta.get()))
+        
 
     def set_apuesta_coin(self, decision):
         self.decision = decision
+        self.boton_cara.configure(state="disabled")
+        self.boton_sello.configure(state="disabled")
+        if self.decision == "Cara":
+            self.boton_cara.configure(fg_color="green")
+        else:
+            self.boton_sello.configure(fg_color="green")
+
+        self.boton_enviar.place(relx=0.15, rely=0.5, anchor="center")
+      
+        
+
+    def set_apuesta(self, cash):
+        self.apuesta_cash = cash
         self.flip_coin()
 
     def flip_coin(self):
@@ -54,10 +58,11 @@ class Coinflip(CTkFrame):
             self.label_resultado.configure(text=f"¡Ganaste!")
         else:
             self.label_resultado.configure(text=f"¡Perdiste!")
-        self.label_resultado.place(relx=0.5, rely=0.25, anchor="center")
+        self.label_resultado.place(relx=0.5, rely=0.4, anchor="center")
 
-        self.boton_cara.destroy()
-        self.boton_sello.destroy()
+        if result == "¡Cayó vertical!":
+            self.label_resultado.configure(text="¡Perdiste! Cayó vertical :c")
+            
         self.boton_enviar = CTkButton(self, text="Reiniciar", command=self.restart)
         self.boton_enviar.place(relx=0.5, rely=0.5, anchor="center")
 
