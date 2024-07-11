@@ -1,4 +1,5 @@
 from customtkinter import *
+from blackjack import Blackjack
 
 
 root = CTk()
