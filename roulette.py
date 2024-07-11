@@ -2,18 +2,19 @@ from customtkinter import *
 from PIL import Image
 import random
 
-class RouletteGame(CTkFrame):
-    def __init__(self, master):
-        super().__init__(master)
-        self.master = master
+class Roullete(CTkFrame):
+    def __init__(self, root, user, command):
+        super().__init__(root)
+        self.root = root
         self.pack(fill="both", expand=True)
+
         
-        # Configuración de la ventana
-        self.master.title("Juego de Ruleta")
-        self.master.geometry("1280x720")
+        self.user = user
         self.numbers = self.initialize_numbers()
         self.init_groups()
         
+        back = CTkButton(self, text="Back", command=command)
+        back.place(x=30, y=30)
         self.bets = {}
 
         self.start_screen()
@@ -27,8 +28,8 @@ class RouletteGame(CTkFrame):
         self.first_half = [i for i in range(1, 19)]
         self.second_half = [i for i in range(19, 37)]
         self.first_row = [i for i in range(1, 37) if i % 3 == 0]
-        self.second_row = [i for i in range(1, 37) if i % 3 == 1]
-        self.third_row = [i for i in range(1, 37) if i % 3 == 2]
+        self.second_row = [i for i in range(1, 37) if i % 3 == 2]
+        self.third_row = [i for i in range(1, 37) if i % 3 == 1]
         self.first_third = [i for i in range(1, 13)]
         self.second_third = [i for i in range(13, 25)]
         self.third_third = [i for i in range(25, 37)]
@@ -52,6 +53,9 @@ class RouletteGame(CTkFrame):
 
         self.x = -random.randint(0, 6120)
         self.x2 = self.x + 7400
+
+        self.money_label = CTkLabel(self, text=f"Dinero: ${self.user.money}", font=("Arial Black", 14))
+        self.money_label.place(relx=0.9, rely=0.1, anchor="center")
         
         image = Image.open("resources/roulette.png")
         roulette_image = CTkImage(light_image=image, size=(7400,200))
@@ -88,7 +92,7 @@ class RouletteGame(CTkFrame):
         frame_height = size * 5 + 6 * pad
         third_width = size * 4 + 3 * pad
         doble_width = size * 2 + pad
-        color = self.master.cget("fg_color")
+        color = self.root.cget("fg_color")
         font = ("Arial Black", 16)
         hover = "gray"
         black = "#373737"
@@ -144,16 +148,16 @@ class RouletteGame(CTkFrame):
             color = black if number in self.black else red
             number_button = CTkButton(self.bet_menu, text=str(number),  width=size, height=size, fg_color=color, hover_color=hover, font=font, command=lambda number=number: self.bet_on_number([number]))
             number_button.place(x= x, y= y)
-
-        
+ 
     def bet_on_number(self, numbers):
         bet = int(self.bet_entry.get())/len(numbers) 
         for num in numbers:
             if num not in self.bets:
-                self.bets[num] = 0  # Initialize the bet for this number if it doesn't exist
-            self.bets[num] += bet  # Update the bet amount
+                self.bets[num] = 0  
+            self.bets[num] += bet
 
-        print(self.bets)
+        self.user.remove_money(int(self.bet_entry.get()))
+        self.money_label.configure(text=f"Dinero: ${self.user.money}")
 
     def all_bets(self):
         total = 0
@@ -185,10 +189,14 @@ class RouletteGame(CTkFrame):
         num = self.numbers[index].number
 
         won = 0 if num not in self.bets else self.bets[num] * 36
+
+        self.user.add_money(won)
+        self.money_label.configure(text=f"Dinero: ${self.user.money}")
+
         self.win_label = CTkLabel(self, text=f"win \n{won}", font=("Arial Black", 14))
         self.win_label.place(relx=0.9, rely=0.865, anchor="center")
 
-        self.master.after(3000, self.win_label.destroy)
+        self.root.after(3000, self.win_label.destroy)
 
         self.bets = {}
 
@@ -220,14 +228,10 @@ class RouletteGame(CTkFrame):
 
         self.roulette_label1.place(x=self.x)
         self.roulette_label2.place(x=self.x2)
-        self.master.after(15, self.animate, time, dx)
+        self.root.after(15, self.animate, time, dx)
         
 class Number:
     def __init__(self, number, color):
         self.number = number
         self.color = color
 
-if __name__ == "__main__":
-    root = CTk()
-    app = RouletteGame(root)
-    root.mainloop()

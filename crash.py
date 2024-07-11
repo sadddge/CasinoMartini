@@ -5,9 +5,11 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import numpy as np
 
 class Crash(CTkFrame):
-    def __init__(self, root, command):
+    def __init__(self, root, user, command):
         super().__init__(root)
         self.place(relwidth=1, relheight=1)
+
+        self.user = user
 
         self.command = command
         self.running = False
@@ -22,6 +24,9 @@ class Crash(CTkFrame):
         self.clear_screen()
         back = CTkButton(self, text="Back", command=self.command)
         back.place(x=30, y=30)
+
+        self.money_label = CTkLabel(self, text=f"Money: ${self.user.money}")
+        self.money_label.place(relx=0.9, rely=0.1, anchor="center")
 
         bet_label = CTkLabel(self, text="Bet:")
         bet_label.place(relx=0.1, rely=0.2, anchor="center")
@@ -49,6 +54,9 @@ class Crash(CTkFrame):
 
         if bet == "": return
 
+        self.user.remove_money(float(bet))
+        self.money_label.configure(text=f"Money: ${self.user.money}")
+
         self.clear_graph()
 
         self.betting = True
@@ -61,15 +69,12 @@ class Crash(CTkFrame):
         self.retire_button.configure(state="normal")
 
        
-
-        # Configurar la figura de matplotlib
         self.fig, self.ax = plt.subplots()
         self.canvas = FigureCanvasTkAgg(self.fig, master=self)
         self.canvas.get_tk_widget().place(relx=0.5, rely=0.5, anchor="center")
         self.multiplier_label = CTkLabel(self, text="Multiplier: 1")
         self.multiplier_label.place(relx=0.5, rely=0.1, anchor="center")
 
-        # Iniciar la animación
         self.animate()
 
     def retire_time(self):
@@ -81,6 +86,9 @@ class Crash(CTkFrame):
     def retire(self):
         self.betting = False
         self.retire_button.configure(state="disabled")
+        self.user.add_money(self.bet * self.multiplier(self.time))
+        money = round(self.user.money, 2)
+        self.money_label.configure(text=f"Money: ${money}")
 
     def clear_graph(self):
         if self.canvas:
@@ -90,13 +98,11 @@ class Crash(CTkFrame):
                 self.multiplier_label.destroy()
 
     def animate(self):
-        
         if self.betting:
-            if self.time >= self.stop_at:
+            if self.retire_time() and self.time >= self.retire_time():
                 self.retire()
 
         if self.time >= self.stop_at:
-            print("stop")
             self.betting = False
             self.running = False
             self.bet_button.configure(state="normal")
@@ -104,7 +110,6 @@ class Crash(CTkFrame):
             return
 
         if self.running:
-            print("running")
             self.time += 0.1
             self.update_plot()
             self.after(100, self.animate)
@@ -113,7 +118,7 @@ class Crash(CTkFrame):
         tiempo = np.linspace(0, self.time, 500)
         y = self.multiplier(tiempo)
 
-        self.multiplier_label.configure(text=f"Multiplier: {round(y[-1], 2)}")
+        self.multiplier_label.configure(text=f"Multiplier: {round(y[-1], 2)}x")
         self.multiplier_label.tkraise()
 
         if self.betting:
@@ -152,13 +157,3 @@ class Crash(CTkFrame):
                 return np.random.uniform(t1, t2)
         return ranges[-1][1]
 
-# Configurar la ventana principal
-root = CTk()
-root.geometry("1280x720")
-root.title("Juego Crash")
-
-# Instanciar la clase Crash
-app = Crash(root, command=root.destroy)
-
-# Iniciar el loop de la ventana principal
-root.mainloop()

@@ -3,9 +3,11 @@ from PIL import Image
 import random
 
 class Dados(CTkFrame):
-    def __init__(self, root, comando):
+    def __init__(self, root, user, comando):
         super().__init__(root)
         self.place(relwidth=1, relheight=1)
+
+        self.user = user
 
         self.setear_imagenes()
         self.comando = comando
@@ -16,6 +18,9 @@ class Dados(CTkFrame):
         
 
     def start_apuesta(self, comando):
+        self.money_label = CTkLabel(self, text=f"Dinero: ${self.user.money}")
+        self.money_label.place(relx=0.85, rely=0.1, anchor = "center")
+
         self.label_mj = CTkLabel(self, text="Apuesta:")
         self.label_mj.place(relx=0.5, rely=0.4, anchor="center")
 

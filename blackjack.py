@@ -5,10 +5,11 @@ from PIL import Image
 
 class Blackjack(CTkFrame):
 
-    def __init__(self, root, comando):
+    def __init__(self, root, user, comando):
         super().__init__(root)
         self.pack(fill="both", expand=True)
         self.root = root
+        self.user = user
         self.comando = comando
         self.cartas = []
         self.valor_dealer = 0
@@ -35,19 +36,22 @@ class Blackjack(CTkFrame):
         back = CTkButton(self, text="Back", command=self.comando)
         back.place(x= 30, y= 30)
 
+        self.money_label = CTkLabel(self, text=f"Dinero: ${self.user.money}", font=("Arial Black", 14))
+        self.money_label.place(relx=0.9, rely=0.1, anchor="center")
+
         self.apuesta_entry = CTkEntry(self)
         self.apuesta_entry.place(relx=0.1, rely=0.9, anchor = "w")
 
-        self.apuesta_label = CTkLabel(self, text= "Apuesta:")
+        self.apuesta_label = CTkLabel(self, text= "Apuesta:", font=("Arial Black", 14))
         self.apuesta_label.place(relx=0.1, rely=0.85, anchor="w")
 
         self.jugar_button = CTkButton(self, text="Jugar", command=self.jugar)
         self.jugar_button.place(relx=0.5, rely=0.9, anchor="center")
 
-        self.dealer = CTkLabel(self, text="Dealer")
+        self.dealer = CTkLabel(self, text="Dealer", font=("Arial Black", 14))
         self.dealer.place(relx=0.5, rely=0.05, anchor="center")
 
-        self.jugador = CTkLabel(self, text="Jugador")
+        self.jugador = CTkLabel(self, text="Jugador", font=("Arial Black", 14))
         self.jugador.place(relx=0.5, rely=0.8, anchor="center")
 
         random.shuffle(self.cartas)
@@ -71,18 +75,23 @@ class Blackjack(CTkFrame):
             self.jugar_button.destroy()
             self.apuesta_entry.destroy()
             self.apuesta_label.configure(text=f"Apuesta: {self.apuesta}")
+
+            self.user.remove_money(self.apuesta)
+            self.money_label.configure(text=f"Dinero: ${self.user.money}")
             
 
             self.hit_button = CTkButton(self, text="Hit", command=self.hit)
             self.hit_button.place(relx=0.4, rely=0.9, anchor="center")
+            self.hit_button.configure(state="disabled")
 
             self.stand_button = CTkButton(self, text="Stand", command=self.stand)
             self.stand_button.place(relx=0.6, rely=0.9, anchor="center")
+            self.stand_button.configure(state="disabled")
 
-            self.label_cartas_dealer = CTkLabel(self, text=f"Cartas: {self.valor_dealer}")
+            self.label_cartas_dealer = CTkLabel(self, text=f"Cartas: {self.valor_dealer}", font=("Arial Black", 14))
             self.label_cartas_dealer.place(relx=0.5, rely=0.1, anchor="center")
 
-            self.label_cartas_jugador = CTkLabel(self, text=f"Cartas: {self.valor_jugador}")
+            self.label_cartas_jugador = CTkLabel(self, text=f"Cartas: {self.valor_jugador}", font=("Arial Black", 14))
             self.label_cartas_jugador.place(relx=0.5, rely=0.75, anchor="center")
 
             self.first_hand()
@@ -109,11 +118,12 @@ class Blackjack(CTkFrame):
 
             self.root.after(1000 + 1000*i, partial(self.animate_cartas, x, carta, dealer=True, show=show))
             self.root.after(1100 + 1000*i, self.update_valores)
+
+        self.root.after(3000, partial(self.hit_button.configure, state = "normal"))
+        self.root.after(3000, partial(self.stand_button.configure, state = "normal"))
         
 
     def hit(self, dealer = False):
-        print("hit")
-
         self.move_cartas(dealer=dealer)
 
         current_cartas = self.cartas_dealer if dealer else self.cartas_jugador
@@ -132,6 +142,9 @@ class Blackjack(CTkFrame):
 
         current_cartas.append(carta)
 
+        self.hit_button.configure(state="disabled")
+        self.stand_button.configure(state="disabled")
+
         if dealer:
             self.root.after(600, self.check_dealer_turn)
         else:
@@ -148,15 +161,18 @@ class Blackjack(CTkFrame):
         self.check_dealer_turn()
            
     def end_game(self, winner):
-
         if winner == "jugador":
-            text = "Ganaste!"
+            text = f"Ganaste ${self.apuesta*2}!"
+            self.user.add_money(self.apuesta*2)
         elif winner == "dealer":
             text = "Perdiste!"
         else:
             text = "Empate!"
+            self.user.add_money(self.apuesta)
 
-        winner_label = CTkLabel(self, text=text, fg_color=None)
+        self.money_label.configure(text=f"Dinero: ${self.user.money}")
+
+        winner_label = CTkLabel(self, text=text, fg_color=None, font=("Arial Black", 14))
         winner_label.place(relx=0.5, y = 295, anchor="center")
 
         self.hit_button.destroy()
@@ -243,7 +259,8 @@ class Blackjack(CTkFrame):
         else: self.end_game("empate")
 
     def check_jugador_turn(self):
-
+        self.hit_button.configure(state="normal")
+        self.stand_button.configure(state="normal")
         if isinstance(self.valor_jugador, list):
             valor = max(self.valor_jugador)
         else: valor = self.valor_jugador

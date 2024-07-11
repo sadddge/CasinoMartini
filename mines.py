@@ -3,10 +3,11 @@ from PIL import Image
 import random
 
 class Mines(CTkFrame):
-    def __init__(self, root, comando):
+    def __init__(self, root, user, comando):
         super().__init__(root)
         self.place(relwidth=1, relheight=1)
 
+        self.user = user
         self.label = CTkLabel(self, text="Mines")
         self.label.place(relx=0.5, rely=0.1, anchor="center")
         self.multiplier = 1.0
@@ -19,6 +20,9 @@ class Mines(CTkFrame):
         self.back.place(x=30, y=30)
     
     def main_interface(self):
+        self.money_label = CTkLabel(self, text=f"Dinero: ${self.user.money}")
+        self.money_label.place(relx=0.9, rely=0.1, anchor = "center")
+
         self.label_apuesta = CTkLabel(self, text="Apuesta:")
         self.label_apuesta.place(relx=0.15, rely=0.3, anchor="center")
 
@@ -37,10 +41,6 @@ class Mines(CTkFrame):
 
         self.boton_enviar = CTkButton(self, text="Start", command=self.start_game)
         self.boton_enviar.place(relx=0.15, rely=0.52, anchor="center")
-
-        
-
-        
 
         self.place_buttons()
         
@@ -72,9 +72,13 @@ class Mines(CTkFrame):
         self.mines = int(self.optionmenu_num_mines.get())
         self.apuesta_cash = int(self.entry_apuesta_cash.get())
 
+        self.user.remove_money(self.apuesta_cash)
+        self.money_label.configure(text=f"Dinero: ${self.user.money}")
+
         self.boton_retirar = CTkButton(self, text="Retirar", command=self.game_over)
         self.boton_retirar.place(relx=0.15, rely=0.59, anchor="center")
 
+        self.multiplier = 1.0
         self.label_winner = CTkLabel(self, text=f"Win: ${int(self.apuesta_cash*self.multiplier)}")
         self.label_winner.place(relx=0.15, rely=0.65, anchor="center")
 
@@ -105,13 +109,17 @@ class Mines(CTkFrame):
 
     def click_minefield(self, row, col):
         if self.minefield[row][col] == -1:
-            self.game_over()
+            self.game_over(False)
         else:
             self.update_multiplier()
             self.hits += 1
             self.minefield_buttons[row][col].configure(state="disabled", fg_color="#37b244")
 
-    def game_over(self):
+    def game_over(self, win = True):
+        if win:
+            self.user.add_money(self.win)
+            self.money_label.configure(text=f"Dinero: ${self.user.money}")
+
         for row in range(5):
             for col in range(5):
                 self.minefield_buttons[row][col].configure(state="disabled")
@@ -120,6 +128,7 @@ class Mines(CTkFrame):
                 elif self.minefield_buttons[row][col].cget("fg_color") != "#37b244":
                     self.minefield_buttons[row][col].configure(fg_color="#284b78")
         
+        self.label_winner.configure(text="Win:")
         self.boton_retirar.destroy()
         self.label_winner.destroy()
 
