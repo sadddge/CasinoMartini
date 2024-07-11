@@ -11,6 +11,7 @@ class Mines(CTkFrame):
         self.label.place(relx=0.5, rely=0.1, anchor="center")
         self.multiplier = 1.0
         self.hits = 0
+        self.win = 0
 
         self.main_interface()
 
@@ -36,6 +37,10 @@ class Mines(CTkFrame):
 
         self.boton_enviar = CTkButton(self, text="Start", command=self.start_game)
         self.boton_enviar.place(relx=0.15, rely=0.52, anchor="center")
+
+        
+
+        
 
         self.place_buttons()
         
@@ -63,8 +68,17 @@ class Mines(CTkFrame):
                 self.minefield_buttons[row][col] = button
 
     def start_game(self):
+        
         self.mines = int(self.optionmenu_num_mines.get())
-        self.apuesta_cash = self.entry_apuesta_cash.get()
+        self.apuesta_cash = int(self.entry_apuesta_cash.get())
+
+        self.boton_retirar = CTkButton(self, text="Retirar", command=self.game_over)
+        self.boton_retirar.place(relx=0.15, rely=0.59, anchor="center")
+
+        self.label_winner = CTkLabel(self, text=f"Win: ${int(self.apuesta_cash*self.multiplier)}")
+        self.label_winner.place(relx=0.15, rely=0.65, anchor="center")
+
+        
         self.create_minefield()
         for col in range(5):
             for row in range(5):
@@ -85,7 +99,9 @@ class Mines(CTkFrame):
         p = 1/self.multiplier
         p *= ((self.not_mines-self.hits)/(25-self.hits))
         self.multiplier = round(1/p,2)
-        self.label_multiplier.configure(text=f"Multiplicador: {self.multiplier}x")   
+        self.win = int(self.apuesta_cash*self.multiplier)
+        self.label_multiplier.configure(text=f"Multiplicador: {self.multiplier}x")
+        self.label_winner.configure(text=f"Win: ${int(self.win)}")   
 
     def click_minefield(self, row, col):
         if self.minefield[row][col] == -1:
@@ -103,4 +119,8 @@ class Mines(CTkFrame):
                     self.minefield_buttons[row][col].configure(fg_color="#b93737")
                 elif self.minefield_buttons[row][col].cget("fg_color") != "#37b244":
                     self.minefield_buttons[row][col].configure(fg_color="#284b78")
+        
+        self.boton_retirar.destroy()
+        self.label_winner.destroy()
+
     
